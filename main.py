@@ -21,7 +21,7 @@ def dividir_nome(nome_tutor: str) -> tuple[str, str]:
 
 def criar_mensagem(nome_tutor: str, nome_cao: str) -> str:
     return (
-        f"Olá, bom dia! Eu falo com {nome_tutor}, tutor do {nome_cao}?\n"
+        f"Olá! Eu falo com {nome_tutor}, tutor do {nome_cao}?\n"
         "Sou da equipe do Dr. Luiz Henrique e só passando aqui rapidinho pra avisar "
         "que já estamos preparando o material personalizado que você pediu no Quiz da Longevidade, "
         "eu te envio já já, ok?"
