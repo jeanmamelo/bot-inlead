@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 import httpx
 from fastapi import FastAPI, Form, status
@@ -54,6 +55,7 @@ async def verificar_ou_criar_subscriber(
 async def enviar_mensagem(client: httpx.AsyncClient, subscriber_id: int, mensagem: str, headers: dict) -> bool:
     url = f"{BOTCONVERSA_BASE_URL}/subscriber/{subscriber_id}/send_message/"
     payload = {"type": "text", "value": mensagem}
+    time.sleep(180)  # Aguardar 3 minutos antes de enviar a mensagem
     response = await client.post(url, json=payload, headers=headers)
 
     if response.status_code == 200:
@@ -67,8 +69,11 @@ async def enviar_mensagem(client: httpx.AsyncClient, subscriber_id: int, mensage
 @app.post("/webhook/inlead")
 async def receive_inlead_form(nome_tutor: str = Form(...), telefone: str = Form(...), nome_cao: str = Form(...)):
     logger.info("Iniciando processamento de webhook InLead")
+    logger.info(f"Nome do tutor: {nome_tutor}, Telefone: {telefone}, Nome do cão: {nome_cao}")
 
-    telefone = telefone if telefone.startswith("55") else "55" + telefone
+    telefone = (
+        telefone if telefone.startswith("55") or telefone.startswith("351") or telefone.startswith("1") else "55" + telefone
+    )
     mensagem = criar_mensagem(nome_tutor, nome_cao)
     headers = {"Api-Key": BOTCONVERSA_TOKEN, "Content-Type": "application/json"}
 
