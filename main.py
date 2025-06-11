@@ -14,9 +14,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-def dividir_nome(nome_tutor: str) -> tuple[str, str]:
+def dividir_nome(nome_tutor: str, nome_cao: str) -> tuple[str, str]:
     partes = nome_tutor.strip().split()
-    return partes[0], " ".join(partes[1:]) if len(partes) > 1 else ""
+    return partes[0], " ".join(partes[1:]) if len(partes) > 1 else nome_cao
 
 
 def criar_mensagem(nome_tutor: str, nome_cao: str) -> str:
@@ -28,7 +28,9 @@ def criar_mensagem(nome_tutor: str, nome_cao: str) -> str:
     )
 
 
-async def verificar_ou_criar_subscriber(client: httpx.AsyncClient, telefone: str, nome_tutor: str, headers: dict) -> int | None:
+async def verificar_ou_criar_subscriber(
+    client: httpx.AsyncClient, telefone: str, nome_tutor: str, nome_cao: str, headers: dict
+) -> int | None:
     get_url = f"{BOTCONVERSA_BASE_URL}/subscriber/get_by_phone/{telefone}/"
     response = await client.get(get_url, headers=headers)
 
@@ -37,7 +39,7 @@ async def verificar_ou_criar_subscriber(client: httpx.AsyncClient, telefone: str
         return response.json().get("id")
 
     logger.info(f"{telefone} não cadastrado. Tentando cadastrar...")
-    nome, sobrenome = dividir_nome(nome_tutor)
+    nome, sobrenome = dividir_nome(nome_tutor, nome_cao)
     payload = {"phone": telefone, "first_name": nome, "last_name": sobrenome}
 
     response = await client.post(f"{BOTCONVERSA_BASE_URL}/subscriber/", json=payload, headers=headers)
@@ -71,7 +73,7 @@ async def receive_inlead_form(nome_tutor: str = Form(...), telefone: str = Form(
     headers = {"Api-Key": BOTCONVERSA_TOKEN, "Content-Type": "application/json"}
 
     async with httpx.AsyncClient(timeout=10.0) as client:
-        subscriber_id = await verificar_ou_criar_subscriber(client, telefone, nome_tutor, headers)
+        subscriber_id = await verificar_ou_criar_subscriber(client, telefone, nome_tutor, nome_cao, headers)
         if not subscriber_id:
             logger.error(f"Erro ao cadastrar {telefone}")
             return JSONResponse(
