@@ -21,12 +21,7 @@ def dividir_nome(nome_tutor: str, nome_cao: str) -> tuple[str, str]:
 
 
 def criar_mensagem(nome_tutor: str, nome_cao: str) -> str:
-    return (
-        f"Olá! Eu falo com {nome_tutor}, tutor do {nome_cao}?\n"
-        "Sou da equipe do Dr. Luiz Henrique e só passando aqui rapidinho pra avisar "
-        "que já estamos preparando o material personalizado que você pediu no Quiz da Longevidade, "
-        "eu te envio já já, ok?"
-    )
+    return f"Olá, falo com {nome_tutor}, responsável por {nome_cao}?"
 
 
 async def verificar_ou_criar_subscriber(
