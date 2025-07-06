@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import time
 
 import httpx
@@ -21,7 +22,13 @@ def dividir_nome(nome_tutor: str, nome_cao: str) -> tuple[str, str]:
 
 
 def criar_mensagem(nome_tutor: str, nome_cao: str) -> str:
-    return f"Olá, falo com {nome_tutor}, responsável por {nome_cao}?"
+    return (
+        f"Olá, falo com {nome_tutor}, responsável por {nome_cao}?\n"
+        "Aqui é da equipe do Dr. Luiz Henrique 🐶\n"
+        "Passando rapidinho pra te enviar o Guia da Longevidade Canina, "
+        "com dicas práticas pra melhorar a saúde e o bem-estar do seu cão.\n"
+        "Dá uma olhada no PDF — vai te ajudar bastante!"
+    )
 
 
 async def verificar_ou_criar_subscriber(
@@ -50,14 +57,20 @@ async def verificar_ou_criar_subscriber(
 async def enviar_mensagem(client: httpx.AsyncClient, subscriber_id: int, mensagem: str, headers: dict) -> bool:
     url = f"{BOTCONVERSA_BASE_URL}/subscriber/{subscriber_id}/send_message/"
     payload = {"type": "text", "value": mensagem}
-    time.sleep(180)  # Aguardar 3 minutos antes de enviar a mensagem
+    payload_pdf = {"type": "file", "value": "https://mentoriadalongevidade.com/wp-content/uploads/2025/07/LONGEVIDADE.pdf.pdf"}
+    delay = random.randint(15, 18)
+    time.sleep(delay)  # Aguarde entre 15 a 18 minutos antes de enviar a mensagem
+    logger.info(f"Enviando mensagem para {subscriber_id} em {delay}.")
     response = await client.post(url, json=payload, headers=headers)
-
     if response.status_code == 200:
-        logger.info("Iniciando processamento de webhook InLead")
+        logger.info("Mensagem de texto enviada com sucesso.")
+    time.sleep(2)
+    response_pdf = await client.post(url, json=payload_pdf, headers=headers)
+    if response_pdf.status_code == 200:
+        logger.info("Mensagem de documento enviada com sucesso.")
         return True
 
-    logger.error(f"Erro ao enviar mensagem: {response.text}")
+    logger.error(f"Erro ao enviar mensagens: {response.text}")
     return False
 
 
